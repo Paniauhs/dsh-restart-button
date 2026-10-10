@@ -19,12 +19,25 @@
  * the restart to its helper. Under the desktop app that closes DSH and starts
  * it again, so the page goes away with it; when only the Host restarts, the
  * page waits for the server to come back and then reloads itself.
+ *
+ * Both the button and the dialog are PORTALED TO `document.body`, and that is
+ * load-bearing. The slot's layer (`.…_overlayLayer`) carries `z-index: 20` and
+ * therefore a stacking context: nothing rendered inside it can rise above a
+ * surface outside it, whatever z-index the element itself declares. The
+ * app's modal surfaces live outside it — the settings dialog is a body-level
+ * `position: fixed; inset: 0; z-index: 1000` element whose mask deliberately
+ * starts below the titlebar, so the caption strip LOOKS untouched while the
+ * dialog still swallows every pointer event in it. The native minimize /
+ * maximize / close buttons keep working through that, because Chromium draws
+ * them outside the page; a page-drawn caption button has to leave the layer to
+ * do the same.
  */
 
 window.__ModuleLoader__.load({
   id: 'dsh-restart-button',
   factory(require) {
     const React = require('react');
+    const ReactDOM = require('react-dom');
 
     const NS = 'dsh-restart-button';
     const STYLE_TAG = 'dsh-restart-button/caption-button.css';
@@ -56,6 +69,14 @@ window.__ModuleLoader__.load({
     const CSS = [
       '.dshRestartButton{',
       'position:fixed;top:0;',
+      // Above every page-owned surface: the settings dialog is 1000, the
+      // account overlay 1001, popovers 1100. The native caption buttons carry
+      // no z-index at all — they are not in the page — so a page-drawn one has
+      // to outrank the whole page to sit beside them. The overlay layer this
+      // used to live in capped it at 20, which is why an open settings dialog
+      // swallowed the click.
+      'z-index:2000;',
+      'pointer-events:auto;',
       // Three Windows caption buttons sit to the right of this one; 138px is
       // 3 x 46 DIP, their width at every display scale. A `:root` declaration
       // of --dsh-restart-caption-inset overrides it for a host that differs.
@@ -88,7 +109,7 @@ window.__ModuleLoader__.load({
       // The confirm dialog. Fixed to the viewport like the button itself, and
       // above every layer the shell draws.
       '.dshRestartScrim{',
-      'position:fixed;inset:0;z-index:2147483000;',
+      'position:fixed;inset:0;z-index:2100;',
       'display:flex;align-items:center;justify-content:center;',
       'background:rgba(0,0,0,.38);',
       // The overlay layer itself is click-through; every entry opts back in,
@@ -388,13 +409,19 @@ window.__ModuleLoader__.load({
         React.createElement(Glyph, null),
       );
 
-      return React.createElement(
-        React.Fragment,
-        null,
-        button,
-        confirming
-          ? React.createElement(RestartConfirmDialog, { t, onCancel: dismiss, onConfirm: confirm })
-          : null,
+      // Out of the slot's layer and onto the body — see the header note. The
+      // React tree stays where the slot put it; the DOM node that paints, and
+      // that receives the click, is a child of `document.body`.
+      return ReactDOM.createPortal(
+        React.createElement(
+          React.Fragment,
+          null,
+          button,
+          confirming
+            ? React.createElement(RestartConfirmDialog, { t, onCancel: dismiss, onConfirm: confirm })
+            : null,
+        ),
+        document.body ?? document.documentElement,
       );
     }
 

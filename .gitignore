@@ -1,0 +1,18 @@
+# Runtime diagnostics: the plugin writes these under %TEMP%, never here, but a
+# manual run may drop one beside the source.
+*.log
+dsh-restart-*/
+
+# This package is consumed by a dsh profile through `link:`; it declares no
+# dependencies of its own, so no dependency tree belongs in the repo.
+node_modules/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp

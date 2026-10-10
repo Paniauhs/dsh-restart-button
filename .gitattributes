@@ -1,0 +1,8 @@
+# The sources are authored with LF; a checkout that rewrites them to CRLF
+# changes every file's bytes without changing anything else.
+* text=auto eol=lf
+
+# Windows-only helper scripts: CRLF is the platform convention there.
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.bat text eol=crlf

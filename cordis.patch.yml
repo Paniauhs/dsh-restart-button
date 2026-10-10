@@ -1,0 +1,5 @@
+# dsh-restart-button bundle patch: inserts the plugin (Host routes + caption-row
+# Client button) into the profile's layer stack.
+- insert:
+    - id: dsh-restart-button
+      name: 'dsh-restart-button'

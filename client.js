@@ -109,7 +109,14 @@ window.__ModuleLoader__.load({
       // The confirm dialog. Fixed to the viewport like the button itself, and
       // above every layer the shell draws.
       '.dshRestartScrim{',
-      'position:fixed;inset:0;z-index:2100;',
+      // The caption row is not the page's to dim. Chromium draws the window
+      // controls — and the opaque overlay plate behind them — ABOVE the web
+      // content, so a scrim spanning the whole viewport ends up as a dark
+      // rectangle with an untouched bright block in its top-right corner. Every
+      // modal in this app masks from the chrome top down for that reason
+      // (`.…_mask { inset: var(--dsh-frame-chrome-top, 0px) 0 0 }`); mirror it,
+      // and the strip keeps one uniform appearance instead of showing a seam.
+      'position:fixed;inset:var(--dsh-frame-chrome-top,0px) 0 0;z-index:2100;',
       'display:flex;align-items:center;justify-content:center;',
       'background:rgba(0,0,0,.38);',
       // The overlay layer itself is click-through; every entry opts back in,

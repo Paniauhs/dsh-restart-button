@@ -33,16 +33,30 @@
 
 ## 安装
 
-克隆到任意位置，再让某个 DSH profile 把它作为本地包装上：
+仓库公开，**按地址直接装**即可：包是纯 JS，没有构建步骤，也不需要先克隆。
+
+把下面任意一种写法填进 DSH 的插件安装入口：
+
+| 写法 | 内容 |
+| --- | --- |
+| 仓库地址 | `https://github.com/Paniauhs/dsh-restart-button` |
+| git 简写 | `github:Paniauhs/dsh-restart-button` |
+| 分支 tarball | `https://codeload.github.com/Paniauhs/dsh-restart-button/tar.gz/refs/heads/main` |
+| 固定版本 | `github:Paniauhs/dsh-restart-button#v1.0.0` |
+
+桌面端在**设置 → 插件**的安装框里贴地址；命令行是 `dsh plugin add <地址>`。这几种写法都在本机用 dsh 自带的 pnpm 11.7 实装验证过，装出来的正好是运行期需要的 8 个文件（`package.json` 的 `files` 字段把 `tools/` 之类挡在外面）。
+
+想改代码就改用克隆 + 本地目录安装——开发时用这种，改完立即生效：
 
 ```sh
 git clone https://github.com/Paniauhs/dsh-restart-button
 ```
 
-- **桌面端**：设置 → 插件 → 安装本地目录，选克隆下来的文件夹。
-- **命令行**：`dsh plugin add <克隆目录>`。
-
 装好后 profile 的 bundle 层里会多出一行 `dsh-restart-button`，`shell.overlay` 槽里出现占用者 `dsh-restart-button`（order 30）。按钮**只在窗口标题栏由页面绘制时才出现**（Windows 桌面端）；浏览器里直接开 `dsh web` 的页面没有原生标题栏，插件正常加载但不画按钮。
+
+> 装的那一刻宿主若已经在跑同一个模块，界面会提示要重启一次才生效——点标题栏那颗按钮就是最快的办法。
+>
+> 另外，在同一个 profile 里连续安装 / 卸载多个插件时，宿主有几率把**别的** bundle 从组合层里移出（实测遇到过）。装完顺手看一眼插件列表，少了哪个就把它重新启用一次。
 
 ## 工作原理
 
